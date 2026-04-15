@@ -11,14 +11,20 @@
 </head>
 <body id="app" class="light">
   <header class="top-bar">
-    <div class="logo">FinPulse</div>
-    <div id="search-container">
+    <div class="logo">
+      <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M3 17L7 13L11 15L15 9L21 7" stroke="url(#logo-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs><linearGradient id="logo-grad" x1="3" y1="7" x2="21" y2="17"><stop stop-color="#0066cc"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+      </svg>
+      <span class="logo-text">FinPulse</span>
+    </div>
+    <div id="search-container" class="onboarding-hide">
       <input type="text" id="search-input" placeholder="Search articles...">
       <button id="search-clear" type="button" aria-label="Clear search">&times;</button>
       <span id="search-hint">Press <kbd>/</kbd> to search</span>
     </div>
     <div class="controls">
-      <select id="country-filter">
+      <select id="country-filter" class="onboarding-hide">
         <option value="global">🌍 Global</option>
         <option value="in">🇮🇳 India</option>
         <option value="us">🇺🇸 United States</option>
@@ -30,49 +36,210 @@
         <option value="au">🇦🇺 Australia</option>
         <option value="ca">🇨🇦 Canada</option>
       </select>
-      <button id="bookmarks-toggle" title="Saved articles">&#9734;</button>
-      <button id="theme-toggle" title="Toggle theme">☀️</button>
+      <button id="refresh-btn" class="icon-btn onboarding-hide" title="Refresh news" aria-label="Refresh">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+      </button>
+      <button id="bookmarks-toggle" class="icon-btn onboarding-hide" title="Saved articles" aria-label="Saved articles">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        <span id="bookmarks-count" class="badge">0</span>
+      </button>
+      <button id="theme-toggle" class="icon-btn" title="Toggle theme">☀️</button>
     </div>
   </header>
 
-  <section class="greeting">
-    <h1 id="greeting-text"></h1>
-    <p id="date-text"></p>
-  </section>
+  <div class="dashboard no-sidebars" id="dashboard">
+    <aside class="sidebar sidebar-left" id="sidebar-left" style="display:none">
+      <div id="watchlist-panel"></div>
+    </aside>
 
-  <div class="intelligence-row">
-    <div id="daily-briefing"></div>
-    <div id="market-mood"></div>
+    <div class="main-content">
+      <section class="greeting-bar">
+        <div class="greeting-left">
+          <h1 id="greeting-text"></h1>
+          <p id="date-text"></p>
+        </div>
+        <div id="market-mood" class="mood-inline"></div>
+        <div class="greeting-stats" id="greeting-stats"></div>
+      </section>
+
+      <div id="daily-briefing" style="display:none"></div>
+
+      <nav class="category-tabs onboarding-hide">
+        <div class="tabs-scroll">
+          <button class="tab active" data-category="top">🔥 Top Stories</button>
+          <button class="tab" data-category="markets">📈 Markets</button>
+          <button class="tab" data-category="crypto">₿ Crypto</button>
+          <button class="tab" data-category="personal-finance">💰 Personal Finance</button>
+          <button class="tab" data-category="economy">🏛️ Economy</button>
+          <button class="tab" data-category="startups">🚀 Startups</button>
+        </div>
+      </nav>
+
+      <main class="news-grid" id="news-grid"></main>
+
+      <div class="loading onboarding-hide" id="loading">
+        <div class="skeleton-grid">
+          <div class="skeleton-card skeleton-hero"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line w40"></div><div class="skeleton-line w100"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line w40"></div><div class="skeleton-line w100"></div><div class="skeleton-line w70"></div></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line w40"></div><div class="skeleton-line w100"></div><div class="skeleton-line w70"></div></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line w40"></div><div class="skeleton-line w100"></div><div class="skeleton-line w70"></div></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line w40"></div><div class="skeleton-line w100"></div><div class="skeleton-line w70"></div></div></div>
+          <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line w40"></div><div class="skeleton-line w100"></div><div class="skeleton-line w70"></div></div></div>
+        </div>
+      </div>
+
+      <div class="error-state" id="error-state" style="display:none">
+        <p>Unable to fetch news. <button id="retry-btn">Retry</button></p>
+      </div>
+
+      <div id="onboarding" class="onboarding" style="display:none">
+        <!-- Floating background orbs -->
+        <div class="ob-orb ob-orb-1"></div>
+        <div class="ob-orb ob-orb-2"></div>
+        <div class="ob-orb ob-orb-3"></div>
+
+        <!-- Left decoration: rising candlestick chart -->
+        <div class="ob-deco ob-deco-left">
+          <svg viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="60" x2="200" y2="60" stroke="currentColor" stroke-opacity="0.12" stroke-dasharray="4 4"/>
+            <line x1="0" y1="120" x2="200" y2="120" stroke="currentColor" stroke-opacity="0.12" stroke-dasharray="4 4"/>
+            <line x1="0" y1="180" x2="200" y2="180" stroke="currentColor" stroke-opacity="0.12" stroke-dasharray="4 4"/>
+            <line x1="0" y1="240" x2="200" y2="240" stroke="currentColor" stroke-opacity="0.12" stroke-dasharray="4 4"/>
+            <!-- Candlesticks — bold fills -->
+            <line x1="25" y1="200" x2="25" y2="140" stroke="#22c55e" stroke-width="2"/>
+            <rect x="17" y="155" width="16" height="35" rx="3" fill="#22c55e" fill-opacity="0.7"/>
+            <line x1="55" y1="225" x2="55" y2="165" stroke="#ef4444" stroke-width="2"/>
+            <rect x="47" y="170" width="16" height="30" rx="3" fill="#ef4444" fill-opacity="0.7"/>
+            <line x1="85" y1="195" x2="85" y2="105" stroke="#22c55e" stroke-width="2"/>
+            <rect x="77" y="120" width="16" height="50" rx="3" fill="#22c55e" fill-opacity="0.7"/>
+            <line x1="115" y1="160" x2="115" y2="70" stroke="#22c55e" stroke-width="2"/>
+            <rect x="107" y="80" width="16" height="55" rx="3" fill="#22c55e" fill-opacity="0.7"/>
+            <line x1="145" y1="135" x2="145" y2="55" stroke="#ef4444" stroke-width="2"/>
+            <rect x="137" y="60" width="16" height="45" rx="3" fill="#ef4444" fill-opacity="0.7"/>
+            <line x1="175" y1="105" x2="175" y2="25" stroke="#22c55e" stroke-width="2"/>
+            <rect x="167" y="30" width="16" height="45" rx="3" fill="#22c55e" fill-opacity="0.7"/>
+            <!-- Trend line -->
+            <path d="M25 170 L55 195 L85 135 L115 95 L145 80 L175 45" stroke="url(#deco-grad-l)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <!-- Area fill under trend -->
+            <path d="M25 170 L55 195 L85 135 L115 95 L145 80 L175 45 L175 300 L25 300 Z" fill="url(#deco-grad-l)" fill-opacity="0.12"/>
+            <defs>
+              <linearGradient id="deco-grad-l" x1="25" y1="45" x2="175" y2="195">
+                <stop stop-color="#0066cc"/>
+                <stop offset="1" stop-color="#7c3aed"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- Right decoration: donut + bars + sparkline -->
+        <div class="ob-deco ob-deco-right">
+          <svg viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Donut chart -->
+            <circle cx="100" cy="80" r="50" stroke="#0066cc" stroke-width="10" stroke-opacity="0.5" stroke-dasharray="110 204" transform="rotate(-90 100 80)"/>
+            <circle cx="100" cy="80" r="50" stroke="#7c3aed" stroke-width="10" stroke-opacity="0.5" stroke-dasharray="70 244" stroke-dashoffset="-110" transform="rotate(-90 100 80)"/>
+            <circle cx="100" cy="80" r="50" stroke="#22c55e" stroke-width="10" stroke-opacity="0.5" stroke-dasharray="50 264" stroke-dashoffset="-180" transform="rotate(-90 100 80)"/>
+            <circle cx="100" cy="80" r="50" stroke="#f59e0b" stroke-width="10" stroke-opacity="0.5" stroke-dasharray="30 284" stroke-dashoffset="-230" transform="rotate(-90 100 80)"/>
+            <circle cx="100" cy="80" r="32" fill="currentColor" fill-opacity="0.05"/>
+            <!-- Bar chart -->
+            <rect x="25" y="175" width="24" height="75" rx="5" fill="#0066cc" fill-opacity="0.55"/>
+            <rect x="58" y="198" width="24" height="52" rx="5" fill="#7c3aed" fill-opacity="0.55"/>
+            <rect x="91" y="165" width="24" height="85" rx="5" fill="#22c55e" fill-opacity="0.55"/>
+            <rect x="124" y="208" width="24" height="42" rx="5" fill="#06b6d4" fill-opacity="0.55"/>
+            <rect x="157" y="188" width="24" height="62" rx="5" fill="#f59e0b" fill-opacity="0.55"/>
+            <!-- Sparkline -->
+            <path d="M25 278 Q58 255 91 265 T157 250 T200 260" stroke="url(#deco-grad-r)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <path d="M25 278 Q58 255 91 265 T157 250 T200 260 L200 300 L25 300 Z" fill="url(#deco-grad-r)" fill-opacity="0.1"/>
+            <defs>
+              <linearGradient id="deco-grad-r" x1="25" y1="250" x2="200" y2="278">
+                <stop stop-color="#7c3aed"/>
+                <stop offset="1" stop-color="#0066cc"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="onboarding-card">
+          <!-- LEFT: Visual showcase -->
+          <div class="ob-showcase">
+            <div class="ob-showcase-inner">
+              <div class="ob-logo-row">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 17L7 13L11 15L15 9L21 7" stroke="url(#ob-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="ob-grad" x1="3" y1="7" x2="21" y2="17"><stop stop-color="#0066cc"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs></svg>
+                <span class="ob-logo-text">FinPulse</span>
+              </div>
+              <h2 class="onboarding-title">Your daily finance briefing, every new tab</h2>
+              <!-- Feature pills -->
+              <div class="onboarding-features">
+                <span class="onboarding-feature">🔥 Top Stories</span>
+                <span class="onboarding-feature">📈 Markets</span>
+                <span class="onboarding-feature">₿ Crypto</span>
+                <span class="onboarding-feature">💰 Personal Finance</span>
+                <span class="onboarding-feature">🏛️ Economy</span>
+                <span class="onboarding-feature">🚀 Startups</span>
+              </div>
+              <div class="onboarding-extras">
+                <span>📊 Market Mood</span>
+                <span>⚡ AI Briefing</span>
+                <span>💡 Jargon Tips</span>
+                <span>⭐ Watchlist</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Setup flow -->
+          <div class="ob-setup">
+            <p class="ob-setup-label">Get started in 30 seconds</p>
+            <div class="onboarding-steps">
+              <div class="onboarding-step" id="onboarding-step-1">
+                <div class="onboarding-step-num">1</div>
+                <div class="onboarding-step-body">
+                  <p class="onboarding-step-title">Create a free GNews account</p>
+                  <p class="onboarding-step-detail">No credit card. Just email + password.</p>
+                  <a href="https://gnews.io/register" target="_blank" rel="noopener" class="onboarding-btn onboarding-btn-primary" id="onboarding-get-key">
+                    <span>Sign up on GNews</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                  </a>
+                </div>
+              </div>
+              <div class="onboarding-step" id="onboarding-step-2">
+                <div class="onboarding-step-num">2</div>
+                <div class="onboarding-step-body">
+                  <p class="onboarding-step-title">Copy your API key</p>
+                  <p class="onboarding-step-detail">Go to your <a href="https://gnews.io/dashboard" target="_blank" rel="noopener">GNews Dashboard</a> and copy the key shown there.</p>
+                </div>
+              </div>
+              <div class="onboarding-step" id="onboarding-step-3">
+                <div class="onboarding-step-num">3</div>
+                <div class="onboarding-step-body">
+                  <p class="onboarding-step-title">Paste it here and you're done</p>
+                  <div class="onboarding-input-row" id="onboarding-input-row">
+                    <input type="text" id="onboarding-key-input" placeholder="Paste API key..." spellcheck="false" autocomplete="off">
+                    <button id="onboarding-save-btn" class="onboarding-save-btn">Save</button>
+                  </div>
+                  <div id="onboarding-status" class="onboarding-status"></div>
+                </div>
+              </div>
+            </div>
+            <div class="onboarding-reassurance">
+              <span>&#x2713; 100% free</span>
+              <span>&#x2713; No credit card</span>
+              <span>&#x2713; 30 sec setup</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <aside id="watchlist-panel"></aside>
-
-  <nav class="category-tabs">
-    <button class="tab active" data-category="top">🔥 Top Stories</button>
-    <button class="tab" data-category="markets">📈 Markets</button>
-    <button class="tab" data-category="crypto">₿ Crypto</button>
-    <button class="tab" data-category="personal-finance">💰 Personal Finance</button>
-    <button class="tab" data-category="economy">🏛️ Economy</button>
-    <button class="tab" data-category="startups">🚀 Startups</button>
-  </nav>
-
-  <main class="news-grid" id="news-grid">
-    <!-- News cards injected by JS -->
-  </main>
-
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p>Fetching latest finance news...</p>
-  </div>
-
-  <div class="error-state" id="error-state" style="display:none">
-    <p>Unable to fetch news. <button id="retry-btn">Retry</button></p>
-  </div>
-
+  <div id="bookmarks-backdrop" class="bookmarks-backdrop"></div>
   <aside id="bookmarks-panel"></aside>
 
   <footer class="footer">
-    <p>FinPulse — Your daily finance briefing</p>
+    <span id="last-updated"></span>
+    <span class="footer-brand">FinPulse v1.0.0</span>
   </footer>
 
   <script src="js/storage.js"></script>

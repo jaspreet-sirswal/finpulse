@@ -67,7 +67,11 @@ FinPulse.Briefing = {
       const data = await res.json();
       const text = data.content?.[0]?.text || '';
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-      return lines.slice(0, this.MAX_BULLETS);
+      // Pair each AI-generated line with the source article URL
+      return lines.slice(0, this.MAX_BULLETS).map((line, i) => ({
+        text: line,
+        url: articles[i] ? articles[i].url : '#'
+      }));
     } catch (err) {
       console.warn('FinPulse Briefing: API failed, using local fallback', err.message);
       return this._localGenerate(articles);
@@ -79,7 +83,7 @@ FinPulse.Briefing = {
     // Deduplicate by checking title similarity — avoid near-duplicate headlines
     const unique = this._deduplicateArticles(articles);
     const top = unique.slice(0, this.MAX_BULLETS);
-    return top.map(a => this._extractBullet(a));
+    return top.map(a => ({ text: this._extractBullet(a), url: a.url }));
   },
 
   // Remove near-duplicate articles (same story from multiple outlets)
@@ -147,7 +151,12 @@ FinPulse.Briefing = {
         <h2>Today's Briefing</h2>
       </div>
       <ul class="briefing-list">
-        ${bullets.map(b => `<li>${b}</li>`).join('')}
+        ${bullets.map(b => {
+          if (typeof b === 'object' && b.url) {
+            return `<li><a href="${b.url}" target="_blank" rel="noopener" style="color:inherit;text-decoration-line:underline;text-decoration-style:dotted;text-underline-offset:3px">${b.text}</a></li>`;
+          }
+          return `<li>${typeof b === 'object' ? b.text : b}</li>`;
+        }).join('')}
       </ul>
     `;
     container.style.display = 'block';

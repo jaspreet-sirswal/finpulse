@@ -9,6 +9,7 @@ FinPulse.Bookmarks = {
   async init() {
     this.items = await FinPulse.Storage.get(this.STORAGE_KEY, []);
     this.bindEvents();
+    this.updateIcons(); // Sync badge on load
   },
 
   isBookmarked(url) {
@@ -30,13 +31,19 @@ FinPulse.Bookmarks = {
     this.updateIcons();
   },
 
-  // Sync all visible bookmark icons with current state
+  // Sync all visible bookmark icons + header badge with current state
   updateIcons() {
     document.querySelectorAll('.bookmark-btn').forEach(btn => {
       const saved = this.isBookmarked(btn.dataset.url);
       btn.textContent = saved ? '\u2605' : '\u2606';
       btn.classList.toggle('bookmarked', saved);
     });
+    // Update header badge count
+    const badge = document.getElementById('bookmarks-count');
+    if (badge) {
+      badge.textContent = this.items.length;
+      badge.style.display = this.items.length > 0 ? 'block' : 'none';
+    }
   },
 
   renderPanel() {
@@ -45,6 +52,10 @@ FinPulse.Bookmarks = {
 
     if (this.items.length === 0) {
       panel.innerHTML = `
+        <div class="bookmarks-header">
+          <h3>Saved Articles</h3>
+          <button id="bookmarks-close" title="Close">&times;</button>
+        </div>
         <p class="bookmarks-empty">
           No saved articles yet. Click \u2606 on any article to save it.
         </p>`;
@@ -94,22 +105,42 @@ FinPulse.Bookmarks = {
         return;
       }
 
-      // Close bookmarks panel
-      if (e.target.id === 'bookmarks-close') {
+      // Close bookmarks panel via close button
+      if (e.target.id === 'bookmarks-close' || e.target.closest('#bookmarks-close')) {
         const panel = document.getElementById('bookmarks-panel');
-        if (panel) panel.style.display = 'none';
+        const backdrop = document.getElementById('bookmarks-backdrop');
+        if (panel) panel.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
         return;
       }
 
-      // Toggle bookmarks panel visibility
-      if (e.target.id === 'bookmarks-toggle') {
+      // Toggle bookmarks panel via header button
+      if (e.target.closest('#bookmarks-toggle')) {
         const panel = document.getElementById('bookmarks-panel');
+        const backdrop = document.getElementById('bookmarks-backdrop');
         if (!panel) return;
-        const visible = panel.style.display === 'block';
-        panel.style.display = visible ? 'none' : 'block';
-        if (!visible) this.renderPanel();
+        const isOpen = panel.classList.contains('open');
+        if (isOpen) {
+          panel.classList.remove('open');
+          if (backdrop) backdrop.classList.remove('open');
+        } else {
+          this.renderPanel();
+          panel.classList.add('open');
+          if (backdrop) backdrop.classList.add('open');
+        }
+        return;
       }
     });
+
+    // Backdrop click-to-close
+    const backdrop = document.getElementById('bookmarks-backdrop');
+    if (backdrop) {
+      backdrop.addEventListener('click', () => {
+        const panel = document.getElementById('bookmarks-panel');
+        if (panel) panel.classList.remove('open');
+        backdrop.classList.remove('open');
+      });
+    }
   }
 };
 

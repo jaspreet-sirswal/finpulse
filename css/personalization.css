@@ -3,32 +3,32 @@
 /* ------------------------------------------------------------------ */
 /*  Watchlist Panel                                                    */
 /* ------------------------------------------------------------------ */
+/* Lives inside .sidebar.sidebar-left; fills sidebar naturally */
 #watchlist-panel {
-  max-width: 300px;
   border-radius: 12px;
   padding: 16px;
-  margin: 0 auto 20px;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 body.light #watchlist-panel {
   background: #ffffff;
-  border: 1px solid #d1d1d6;
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 body.dark #watchlist-panel {
-  background: #16213e;
-  border: 1px solid #2a2a4a;
+  background: #1e2845;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .watchlist-header {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .watchlist-header h3 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -88,7 +88,7 @@ body.dark .watchlist-symbol {
 }
 
 body.light .watchlist-name {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark .watchlist-name {
@@ -111,7 +111,7 @@ body.dark .watchlist-name {
 }
 
 body.light .watchlist-remove {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark .watchlist-remove {
@@ -123,14 +123,18 @@ body.dark .watchlist-remove {
 }
 
 /* Watchlist empty state */
-.watchlist-empty p {
+.watchlist-empty {
   text-align: center;
+  padding: 16px 8px;
+}
+
+.watchlist-empty p {
   font-size: 13px;
-  padding: 8px 0;
+  line-height: 1.5;
 }
 
 body.light .watchlist-empty p {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark .watchlist-empty p {
@@ -212,21 +216,23 @@ body.dark #watchlist-add-btn {
 
 .bookmark-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 28px;
-  height: 28px;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  background: rgba(0, 0, 0, 0.45);
+  font-size: 16px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: none;
-  border-radius: 50%;
+  border-radius: 8px;
   cursor: pointer;
   z-index: 10;
   opacity: 0;
-  transition: opacity 0.2s, color 0.2s, background 0.2s;
+  transition: opacity 0.2s, background 0.2s, transform 0.15s;
   color: #ffffff;
   padding: 0;
   line-height: 1;
@@ -243,8 +249,12 @@ body.dark #watchlist-add-btn {
   color: #f59e0b;
 }
 
+.bookmark-btn:hover {
+  transform: scale(1.1);
+}
+
 body.light .bookmark-btn:hover {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.55);
 }
 
 body.dark .bookmark-btn:hover {
@@ -254,16 +264,21 @@ body.dark .bookmark-btn:hover {
 /* ------------------------------------------------------------------ */
 /*  Bookmarks Panel (slide-in overlay)                                 */
 /* ------------------------------------------------------------------ */
+/* Uses .open class toggle instead of display:none/block */
 #bookmarks-panel {
   position: fixed;
   top: 0;
   right: 0;
-  width: 350px;
+  width: 380px;
   height: 100vh;
-  z-index: 200;
-  display: none;
+  z-index: 300;
   overflow-y: auto;
-  transition: background-color 0.3s ease;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#bookmarks-panel.open {
+  transform: translateX(0);
 }
 
 body.light #bookmarks-panel {
@@ -272,10 +287,31 @@ body.light #bookmarks-panel {
 }
 
 body.dark #bookmarks-panel {
-  background: #16213e;
+  background: #1e2845;
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
 }
 
+/* ------------------------------------------------------------------ */
+/*  Bookmarks Backdrop                                                 */
+/* ------------------------------------------------------------------ */
+.bookmarks-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.bookmarks-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Bookmarks Panel Inner Styles                                       */
+/* ------------------------------------------------------------------ */
 .bookmarks-header {
   display: flex;
   align-items: center;
@@ -319,7 +355,7 @@ body.dark .bookmarks-header h3 {
 }
 
 body.light #bookmarks-close {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark #bookmarks-close {
@@ -391,7 +427,7 @@ body.dark .bookmark-source {
 }
 
 body.light .bookmark-time {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark .bookmark-time {
@@ -405,38 +441,18 @@ body.dark .bookmark-time {
 }
 
 body.light .bookmarks-empty {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark .bookmarks-empty {
   color: #9ca3af;
 }
 
-/* Bookmarks toggle button in header */
+/* Bookmarks toggle — uses .icon-btn from styles.css */
 #bookmarks-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  font-size: 18px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: background-color 0.2s;
-}
-
-body.light #bookmarks-toggle {
-  color: #1d1d1f;
-}
-
-body.dark #bookmarks-toggle {
-  color: #e4e4e7;
-}
-
-#bookmarks-toggle:hover {
-  background: rgba(128, 128, 128, 0.15);
 }
 
 /* ------------------------------------------------------------------ */
@@ -447,24 +463,52 @@ body.dark #bookmarks-toggle {
 }
 
 body.light .news-card.watchlist-relevant {
-  border: 1px solid rgba(0, 102, 204, 0.3);
+  outline: 1px solid rgba(0, 102, 204, 0.3);
+  outline-offset: -1px;
 }
 
 body.dark .news-card.watchlist-relevant {
-  border: 1px solid rgba(77, 166, 255, 0.3);
+  outline: 1px solid rgba(77, 166, 255, 0.3);
+  outline-offset: -1px;
 }
 
 /* ------------------------------------------------------------------ */
 /*  Responsive — Mobile (<768px)                                       */
 /* ------------------------------------------------------------------ */
 @media (max-width: 768px) {
-  #watchlist-panel {
-    max-width: 100%;
-    margin: 0 16px 16px;
-    border-radius: 10px;
-  }
+  #watchlist-panel { border-radius: 10px; }
+  #bookmarks-panel { width: 100%; right: 0; }
+  .bookmark-btn { opacity: 1; } /* Always visible on touch devices */
+  /* Prevent iOS zoom on input focus */
+  .watchlist-add input,
+  #watchlist-input { font-size: 16px; }
+  /* Touch-friendly remove buttons */
+  .watchlist-remove { min-width: 44px; min-height: 44px; }
+  /* Touch-friendly bookmark close */
+  #bookmarks-close { min-width: 44px; min-height: 44px; }
+  /* Bookmark items need adequate touch targets */
+  .bookmark-item { padding: 14px 16px; min-height: 44px; }
+}
 
-  #bookmarks-panel {
-    width: 100%;
+/* ------------------------------------------------------------------ */
+/*  Responsive — Tablet (769px–1100px)                                 */
+/* ------------------------------------------------------------------ */
+@media (min-width: 769px) and (max-width: 1100px) {
+  /* Watchlist becomes compact horizontal layout in stacked sidebar */
+  #watchlist-panel { width: 100%; }
+  .watchlist-items {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
   }
+  .watchlist-item {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    border-bottom: none;
+    border-radius: 8px;
+  }
+  body.light .watchlist-item { background: #f5f5f7; }
+  body.dark .watchlist-item { background: rgba(255,255,255,0.04); }
+  /* Bookmarks panel slightly narrower on tablet */
+  #bookmarks-panel { width: 340px; }
 }
