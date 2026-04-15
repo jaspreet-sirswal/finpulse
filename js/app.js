@@ -34,21 +34,134 @@ FinPulse.App = {
     try { if (FinPulse.Bookmarks) await FinPulse.Bookmarks.init(); } catch (e) { console.warn('Bookmarks init failed', e); }
     try { if (FinPulse.Search) FinPulse.Search.init(); } catch (e) { console.warn('Search init failed', e); }
 
+    this.bindOnboarding();
+
     await this.loadNews();
   },
 
   setGreeting() {
     const hour = new Date().getHours();
-    // Time-based greeting for a personal touch on new-tab
     const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
     const el = document.getElementById('greeting-text');
-    if (el) el.textContent = `${greeting} \u{1F44B}`;
+    if (el) el.textContent = greeting;
+  },
+
+  // Render aggregate stats into greeting bar
+  updateStats(articleCount, moodLabel, filteredCount) {
+    const el = document.getElementById('greeting-stats');
+    if (!el) return;
+    const parts = [];
+    if (filteredCount !== undefined && filteredCount !== articleCount) {
+      parts.push(`<span class="stat">${filteredCount} of ${articleCount} articles</span>`);
+    } else if (articleCount > 0) {
+      parts.push(`<span class="stat">${articleCount} articles</span>`);
+    }
+    if (moodLabel) parts.push(`<span class="stat">${moodLabel}</span>`);
+    // Show active country flag
+    const countrySelect = document.getElementById('country-filter');
+    if (countrySelect) {
+      const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+      if (selectedOption) {
+        const flag = selectedOption.textContent.split(' ')[0]; // Extract emoji flag
+        parts.push(`<span class="stat">${flag}</span>`);
+      }
+    }
+    // Count watchlist matches
+    if (FinPulse.Watchlist && FinPulse.Watchlist.items.length > 0) {
+      parts.push(`<span class="stat">${FinPulse.Watchlist.items.length} watching</span>`);
+    }
+    el.innerHTML = parts.join('<span style="opacity:0.3">·</span>');
   },
 
   setDate() {
     const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const el = document.getElementById('date-text');
     if (el) el.textContent = new Date().toLocaleDateString('en-US', opts);
+  },
+
+  bindOnboarding() {
+    // Save button — validate key, store, reload
+    var saveBtn = document.getElementById('onboarding-save-btn');
+    var keyInput = document.getElementById('onboarding-key-input');
+    var statusEl = document.getElementById('onboarding-status');
+
+    var self = this;
+
+    function showStatus(msg, type) {
+      if (!statusEl) return;
+      statusEl.textContent = msg;
+      statusEl.className = 'onboarding-status ' + type;
+    }
+
+    async function saveKey() {
+      if (!keyInput) return;
+      var key = keyInput.value.trim();
+      if (!key) {
+        showStatus('Please paste your API key', 'error');
+        return;
+      }
+      if (key.length < 20) {
+        showStatus('That key looks too short — check your GNews dashboard', 'error');
+        return;
+      }
+
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Validating...';
+      }
+
+      try {
+        var res = await fetch('https://gnews.io/api/v4/search?q=finance&max=1&apikey=' + key);
+        if (res.ok) {
+          // Key works — persist and transition to full dashboard
+          await FinPulse.Storage.set('gnews_api_key', key);
+          FinPulse.News._apiKey = key;
+
+          // Exit onboarding mode
+          document.body.classList.remove('onboarding');
+          var onboarding = document.getElementById('onboarding');
+          if (onboarding) onboarding.style.display = 'none';
+
+          // Reveal sidebars
+          var dashboard = document.getElementById('dashboard');
+          if (dashboard) dashboard.classList.remove('no-sidebars');
+          var sidebarLeft = document.getElementById('sidebar-left');
+              if (sidebarLeft) sidebarLeft.style.display = '';
+    
+          // Load news with the new key
+          await self.loadNews();
+        } else if (res.status === 403 || res.status === 429) {
+          // 403/429 during onboarding = rate limited, not invalid key
+          // Save the key anyway — it'll work when the limit resets
+          await FinPulse.Storage.set('gnews_api_key', key);
+          FinPulse.News._apiKey = key;
+
+          var resetAt = new Date();
+          resetAt.setUTCDate(resetAt.getUTCDate() + 1);
+          resetAt.setUTCHours(0, 0, 0, 0);
+          var resetLocal = resetAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+          showStatus('Key saved! GNews daily limit reached — news will load after ' + resetLocal + '.', 'success');
+        } else {
+          showStatus('GNews returned error ' + res.status + ' — try again', 'error');
+        }
+      } catch (e) {
+        showStatus('Could not reach GNews — check your connection', 'error');
+      }
+
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save';
+      }
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', saveKey);
+    }
+    if (keyInput) {
+      keyInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') saveKey();
+      });
+    }
   },
 
   bindEvents() {
@@ -85,6 +198,15 @@ FinPulse.App = {
         await this.loadNews();
       });
     }
+
+    // Refresh button — clear cache and reload
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', async () => {
+        FinPulse.News.cache = {};
+        await this.loadNews();
+      });
+    }
   },
 
   async loadNews() {
@@ -92,8 +214,9 @@ FinPulse.App = {
     const loading = document.getElementById('loading');
     const errorState = document.getElementById('error-state');
 
+    if (grid) grid.style.opacity = '0';
     if (grid) grid.innerHTML = '';
-    if (loading) loading.style.display = 'flex';
+    if (loading) loading.style.display = 'block';
     if (errorState) errorState.style.display = 'none';
 
     try {
@@ -103,13 +226,26 @@ FinPulse.App = {
       );
       if (loading) loading.style.display = 'none';
 
-      // API key missing handler already rendered guidance into grid
       if (!articles || articles.length === 0) {
+        // In onboarding mode, the onboarding card handles the UI
+        if (document.body.classList.contains('onboarding')) {
+          if (grid) grid.style.opacity = '1';
+          return;
+        }
         if (grid && !grid.innerHTML.trim()) {
           grid.innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--muted)">No articles found for this category. Try another one.</p>';
         }
+        if (grid) grid.style.opacity = '1';
         return;
       }
+
+      // API key is valid and articles loaded — reveal full dashboard layout
+      var dashboard = document.getElementById('dashboard');
+      if (dashboard) dashboard.classList.remove('no-sidebars');
+      var sidebarLeft = document.getElementById('sidebar-left');
+      var briefing = document.getElementById('daily-briefing');
+      if (sidebarLeft) sidebarLeft.style.display = '';
+      if (briefing) briefing.style.display = '';
 
       // Phase 3: personalize article order based on engagement history
       const ranked = FinPulse.Preferences
@@ -123,9 +259,15 @@ FinPulse.App = {
       });
       if (grid) {
         grid.innerHTML = html;
-        // Hide broken images via delegated listener (inline onerror forbidden by MV3 CSP)
+        requestAnimationFrame(() => { if (grid) grid.style.opacity = '1'; });
+        // Replace broken images with SVG placeholder (inline onerror forbidden by MV3 CSP)
         grid.querySelectorAll('.news-card-image').forEach(img => {
-          img.addEventListener('error', () => { img.style.display = 'none'; });
+          img.addEventListener('error', () => {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'news-card-img-placeholder';
+            placeholder.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"><path d="M3 17L7 13L11 15L15 9L21 7"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>';
+            img.replaceWith(placeholder);
+          });
         });
       }
 
@@ -135,23 +277,60 @@ FinPulse.App = {
       // Phase 4: cache articles for client-side search filtering
       if (FinPulse.Search) FinPulse.Search.setArticles(ranked);
 
+      // Update article count in greeting stats before intelligence layer
+      this.updateStats(articles.length, null);
+
       // Phase 2: intelligence layer — runs after cards are in DOM
       this._runIntelligence(articles);
+
+      // Update footer with relative timestamp that auto-refreshes
+      this._lastUpdated = Date.now();
+      this._updateFooterTimestamp();
+      if (!this._footerInterval) {
+        this._footerInterval = setInterval(() => this._updateFooterTimestamp(), 60000);
+      }
     } catch (err) {
       if (loading) loading.style.display = 'none';
-      if (errorState) errorState.style.display = 'block';
-      console.error('FinPulse: Failed to fetch news', err);
+
+      if (err.message === 'RATE_LIMIT') {
+        if (grid) {
+          grid.style.opacity = '1';
+          grid.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:3rem 2rem">
+              <div style="font-size:48px;margin-bottom:16px">⏳</div>
+              <h3 style="font-size:18px;margin-bottom:8px">GNews API rate limit reached</h3>
+              <p style="font-size:14px;margin-bottom:16px;opacity:0.7">
+                The free GNews plan allows 100 requests per day. FinPulse caches results, but switching categories frequently can use up the quota.
+              </p>
+              <div style="display:inline-block;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:500;background:linear-gradient(135deg,rgba(0,102,204,0.1),rgba(124,58,237,0.1))">
+                Resets at <strong>${err.resetTime}</strong> (in ~${err.hoursLeft}h)
+              </div>
+              <p style="font-size:12px;margin-top:16px;opacity:0.5">
+                This is a GNews limit, not a FinPulse limit. Cached articles will still load.
+              </p>
+            </div>`;
+        }
+        // Warn instead of error — keeps Chrome errors panel clean
+        console.warn('FinPulse: GNews rate limit reached, resets at', err.resetTime);
+      } else {
+        if (errorState) errorState.style.display = 'block';
+        console.warn('FinPulse: Failed to fetch news', err.message);
+      }
     }
   },
 
   // Phase 2: briefing + sentiment + jargon — fire-and-forget after cards render
   async _runIntelligence(articles) {
     try {
+      let moodLabel = null;
       // Sentiment is synchronous — render immediately
       if (FinPulse.Sentiment) {
         const mood = FinPulse.Sentiment.analyze(articles);
-        FinPulse.Sentiment.render(mood);
+        FinPulse.Sentiment.render(mood, articles.length);
+        moodLabel = `${mood.emoji} ${mood.label}`;
       }
+      // Push mood into greeting stats bar
+      this.updateStats(articles.length, moodLabel);
       // Briefing may hit cache/API — async
       if (FinPulse.Briefing) {
         const bullets = await FinPulse.Briefing.generate(articles);
@@ -164,14 +343,28 @@ FinPulse.App = {
     }
   },
 
+  _updateFooterTimestamp() {
+    const el = document.getElementById('last-updated');
+    if (!el || !this._lastUpdated) return;
+    const diff = Math.floor((Date.now() - this._lastUpdated) / 60000);
+    if (diff < 1) {
+      el.textContent = 'Updated just now';
+    } else {
+      el.textContent = `Updated ${diff}m ago`;
+    }
+  },
+
   createCard(article) {
     const timeAgo = FinPulse.News.formatTime(article.publishedAt);
     const tldr = FinPulse.News.generateTLDR(article.description);
-    // Lazy-load images; hide broken ones gracefully via onerror
-    // No inline onerror — MV3 CSP forbids it. Broken images handled via delegated listener.
+    // Lazy-load images; broken ones replaced with SVG placeholder via delegated listener
     const imageHTML = article.image
       ? `<img class="news-card-image" src="${article.image}" alt="" loading="lazy">`
-      : '';
+      : `<div class="news-card-img-placeholder">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
+        <path d="M3 17L7 13L11 15L15 9L21 7"/><rect x="2" y="2" width="20" height="20" rx="2"/>
+      </svg>
+    </div>`;
 
     // Phase 3: highlight cards matching watchlist symbols
     const relevantClass = FinPulse.Watchlist && FinPulse.Watchlist.isRelevant(article)
@@ -193,7 +386,7 @@ FinPulse.App = {
     const safeTldr = escapeHTML(tldr);
 
     return `
-      <a href="${safeUrl}" target="_blank" rel="noopener" class="news-card${relevantClass}" style="text-decoration:none;color:inherit">
+      <a href="${safeUrl}" target="_blank" rel="noopener" class="news-card${relevantClass}" data-color="${this.currentCategory}">
         ${bookmarkBtn}
         ${imageHTML}
         <div class="news-card-body">
@@ -202,7 +395,7 @@ FinPulse.App = {
           <p class="news-card-tldr">${safeTldr}</p>
           <div class="news-card-meta">
             <span>${timeAgo}</span>
-            <span class="news-card-category">${this.currentCategory}</span>
+            <span class="news-card-category" data-color="${this.currentCategory}">${this.currentCategory}</span>
           </div>
         </div>
       </a>`;

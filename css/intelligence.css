@@ -1,12 +1,15 @@
 /* === Phase 2: Intelligence — Briefing, Sentiment, Jargon === */
 
 /* ---------- Daily Briefing ---------- */
+/* Lives inside .main-content; full-width, no centering */
 #daily-briefing {
-  max-width: 720px;
-  margin: 20px auto 0;
-  padding: 20px 24px;
+  padding: 16px 20px;
   border-radius: 12px;
-  display: none; /* shown by JS when briefing is ready */
+  margin-bottom: 20px;
+  display: none; /* shown by JS */
+  overflow: hidden;
+  border-left: 3px solid;
+  border-image: linear-gradient(to bottom, #0066cc, #7c3aed) 1;
 }
 
 body.light #daily-briefing {
@@ -15,7 +18,7 @@ body.light #daily-briefing {
 }
 
 body.dark #daily-briefing {
-  background: #16213e;
+  background: #1e2845;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
@@ -49,6 +52,7 @@ body.dark .briefing-header h2 {
   list-style: none;
   padding: 0;
   margin: 0;
+  overflow: hidden;
 }
 
 .briefing-list li {
@@ -57,6 +61,16 @@ body.dark .briefing-header h2 {
   font-size: 14px;
   line-height: 1.6;
   border-left: 3px solid;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.briefing-list li a {
+  display: inline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 body.light .briefing-list li {
@@ -74,11 +88,14 @@ body.dark .briefing-list li {
 }
 
 /* ---------- Market Mood ---------- */
+/* Lives inside .sidebar.sidebar-right; fills sidebar naturally */
 #market-mood {
-  max-width: 720px;
-  margin: 12px auto 0;
-  padding: 16px 24px;
+  padding: 16px;
   border-radius: 12px;
+}
+
+#market-mood:empty {
+  display: none;
 }
 
 body.light #market-mood {
@@ -87,7 +104,7 @@ body.light #market-mood {
 }
 
 body.dark #market-mood {
-  background: #16213e;
+  background: #1e2845;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
@@ -96,10 +113,17 @@ body.dark #market-mood {
   justify-content: space-between;
   align-items: center;
   font-size: 13px;
+  margin-bottom: 2px;
 }
 
+.mood-title {
+  font-weight: 600;
+}
+body.light .mood-title { color: #1d1d1f; }
+body.dark .mood-title { color: #e4e4e7; }
+
 body.light .mood-header {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark .mood-header {
@@ -116,6 +140,51 @@ body.light .mood-label {
 
 body.dark .mood-label {
   color: #e4e4e7;
+}
+
+/* Info icon + tooltip */
+.mood-info-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.mood-info-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: italic;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  font-family: Georgia, serif;
+}
+body.light .mood-info-icon { background: rgba(0,0,0,0.08); color: #585860; }
+body.dark .mood-info-icon { background: rgba(255,255,255,0.1); color: #9ca3af; }
+
+.mood-info-tooltip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  font-style: normal;
+  font-weight: 400;
+  z-index: 50;
+  pointer-events: none;
+}
+body.light .mood-info-tooltip { background: #1d1d1f; color: #f5f5f7; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+body.dark .mood-info-tooltip { background: #e4e4e7; color: #1a1a2e; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+
+.mood-info-icon:hover + .mood-info-tooltip,
+.mood-info-icon:focus + .mood-info-tooltip {
+  display: block;
 }
 
 .mood-bar {
@@ -155,36 +224,11 @@ body.dark .mood-indicator {
 }
 
 body.light .mood-scale {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark .mood-scale {
   color: #9ca3af;
-}
-
-/* ---------- Intelligence Row (Briefing + Mood side-by-side on wide screens) ---------- */
-.intelligence-row {
-  max-width: 960px;
-  margin: 20px auto 0;
-  padding: 0 32px;
-  display: flex;
-  gap: 16px;
-  align-items: stretch;
-}
-
-.intelligence-row #daily-briefing {
-  flex: 2;
-  margin: 0;
-  max-width: none;
-}
-
-.intelligence-row #market-mood {
-  flex: 1;
-  margin: 0;
-  max-width: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
 /* ---------- Jargon Hover Term ---------- */
@@ -237,23 +281,38 @@ body.dark .jargon-tooltip {
 
 /* ---------- Responsive — Mobile (<768px) ---------- */
 @media (max-width: 768px) {
-  .intelligence-row {
-    flex-direction: column;
-    padding: 0 16px;
+  #daily-briefing { padding: 14px 16px; }
+  /* Allow briefing bullets to wrap on mobile instead of truncating */
+  .briefing-list li {
+    white-space: normal;
+    text-overflow: unset;
+    overflow: visible;
+    word-break: break-word;
   }
-
-  .intelligence-row #daily-briefing,
-  .intelligence-row #market-mood {
-    flex: none;
+  .briefing-list li a {
+    white-space: normal;
+    text-overflow: unset;
+    overflow: visible;
   }
-
-  #daily-briefing {
-    margin: 16px 16px 0;
-    padding: 16px 18px;
-  }
-
   #market-mood {
-    margin: 10px 16px 0;
-    padding: 12px 18px;
+    padding: 12px 14px;
+    width: 100%;
+  }
+  /* Jargon tooltip: constrain to viewport */
+  .jargon-tooltip { max-width: calc(100vw - 32px); }
+}
+
+/* ---------- Responsive — Tablet (769px–1100px) ---------- */
+@media (min-width: 769px) and (max-width: 1100px) {
+  /* Market mood goes full width when sidebar stacks horizontally */
+  #market-mood { width: 100%; }
+  /* Briefing bullets can wrap on narrower screens */
+  .briefing-list li {
+    white-space: normal;
+    text-overflow: unset;
+  }
+  .briefing-list li a {
+    white-space: normal;
+    text-overflow: unset;
   }
 }

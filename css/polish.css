@@ -27,11 +27,11 @@ body.light #search-input {
   background-color: #ffffff;
   border: 1px solid #d1d1d6;
   color: #1d1d1f;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23585860' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
 }
 
 body.dark #search-input {
-  background-color: #16213e;
+  background-color: #1e2845;
   border: 1px solid #2a2a4a;
   color: #e4e4e7;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
@@ -48,7 +48,7 @@ body.dark #search-input:focus {
 }
 
 body.light #search-input::placeholder {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark #search-input::placeholder {
@@ -77,7 +77,7 @@ body.dark #search-input::placeholder {
 
 body.light #search-clear {
   background: #e5e5ea;
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark #search-clear {
@@ -107,7 +107,7 @@ body.dark #search-clear:hover {
 }
 
 body.light #search-hint {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark #search-hint {
@@ -125,7 +125,7 @@ body.dark #search-hint {
 body.light #search-hint kbd {
   background: #f0f0f3;
   border: 1px solid #d1d1d6;
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark #search-hint kbd {
@@ -157,7 +157,7 @@ body.dark mark.search-highlight {
 }
 
 body.light .search-empty {
-  color: #6e6e73;
+  color: #585860;
 }
 
 body.dark .search-empty {
@@ -166,22 +166,40 @@ body.dark .search-empty {
 
 /* --- News Grid: smooth content transitions --- */
 #news-grid {
-  transition: opacity 0.15s ease;
+  transition: opacity 0.2s ease;
 }
 
 /* === Responsive (<768px) === */
 @media (max-width: 768px) {
   #search-container {
     max-width: none;
-    margin: 0 12px;
+    margin: 0;
   }
 
   #search-input {
-    font-size: 13px;
-    padding: 8px 32px 8px 34px;
+    /* 16px prevents iOS auto-zoom on focus */
+    font-size: 16px;
+    padding: 12px 36px 12px 38px;
+    min-height: 44px;
   }
 
   #search-hint {
     display: none;
+  }
+
+  /* Touch-friendly clear button — expand tap area via padding */
+  #search-clear {
+    width: 28px;
+    height: 28px;
+    padding: 8px;
+    box-sizing: content-box;
+  }
+}
+
+/* === Responsive — Tablet (769px–1100px) === */
+@media (min-width: 769px) and (max-width: 1100px) {
+  #search-container {
+    max-width: 360px;
+    margin: 0 16px;
   }
 }

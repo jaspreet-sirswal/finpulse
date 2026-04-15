@@ -70,10 +70,16 @@ FinPulse.Sentiment = {
     // Convert score (-1..+1) to percentage (0..100) for gauge positioning
     const pct = Math.round((mood.score + 1) * 50);
 
+    // Count how many articles contributed to the score
+    var articleCount = arguments[1] || 0;
+
     container.innerHTML = `
       <div class="mood-header">
-        <span>Market Mood</span>
-        <span class="mood-label">${mood.emoji} ${mood.label}</span>
+        <span class="mood-title">News Pulse ${mood.emoji}</span>
+        <span class="mood-info-wrap">
+          <span class="mood-info-icon" tabindex="0">i</span>
+          <span class="mood-info-tooltip">Based on tone of today's ${articleCount || ''} headlines. This reflects news language, not live market data.</span>
+        </span>
       </div>
       <div class="mood-bar">
         <div class="mood-indicator" style="left: ${pct}%"></div>

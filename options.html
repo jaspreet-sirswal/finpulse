@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinPulse — Settings</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 48px 24px;
+    }
+
+    .container {
+      max-width: 560px;
+      width: 100%;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #0066cc, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #6e6e73;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .steps {
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 40px;
+      padding-bottom: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1d1d1f;
+    }
+
+    .steps li:last-child { padding-bottom: 0; }
+
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #0066cc;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .get-key-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #0066cc;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .get-key-btn:hover { background: #0055aa; }
+
+    .get-key-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .input-group {
+      margin-top: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6e6e73;
+      margin-bottom: 6px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #d1d1d6;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-row input:focus {
+      border-color: #0066cc;
+    }
+
+    .input-row input::placeholder {
+      color: #c5c5c7;
+      font-family: inherit;
+    }
+
+    .save-btn {
+      padding: 10px 24px;
+      background: #0066cc;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .save-btn:hover { background: #0055aa; }
+    .save-btn:disabled { background: #c5c5c7; cursor: not-allowed; }
+
+    .status {
+      margin-top: 12px;
+      font-size: 13px;
+      min-height: 20px;
+    }
+
+    .status.success { color: #22863a; }
+    .status.error { color: #d73a49; }
+
+    .info-box {
+      background: #f0f4ff;
+      border-left: 3px solid #0066cc;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #1d1d1f;
+    }
+
+    .info-box strong { font-weight: 600; }
+
+    .current-key {
+      margin-top: 16px;
+      padding: 10px 14px;
+      background: #f5f5f7;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #6e6e73;
+      display: none;
+    }
+
+    .current-key .key-value {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #1d1d1f;
+      font-weight: 500;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #d73a49;
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: 8px;
+      text-decoration: underline;
+    }
+
+    /* Dark mode */
+    body.dark {
+      background: #1a1a2e;
+      color: #e4e4e7;
+    }
+
+    body.dark .card {
+      background: #1e2845;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    body.dark .card h2 { color: #e4e4e7; }
+
+    body.dark .subtitle { color: #9ca3af; }
+
+    body.dark .steps li { color: #e4e4e7; }
+
+    body.dark .input-row input {
+      background: #1a1a2e;
+      border-color: #2a2a4a;
+      color: #e4e4e7;
+    }
+
+    body.dark .input-row input:focus { border-color: #4da6ff; }
+    body.dark .input-row input::placeholder { color: #4a4a6a; }
+
+    body.dark .input-group label { color: #9ca3af; }
+
+    body.dark .info-box {
+      background: rgba(0, 102, 204, 0.1);
+      border-left-color: #4da6ff;
+      color: #e4e4e7;
+    }
+
+    body.dark .current-key {
+      background: #1a1a2e;
+      color: #9ca3af;
+    }
+
+    body.dark .current-key .key-value { color: #e4e4e7; }
+
+    body.dark p { color: #9ca3af; }
+
+    /* === Responsive — Mobile === */
+    @media (max-width: 768px) {
+      body {
+        padding: 24px 16px;
+      }
+
+      .logo { font-size: 24px; }
+
+      .card { padding: 20px 16px; }
+
+      .steps li {
+        padding-left: 36px;
+        font-size: 13px;
+      }
+
+      .steps li::before {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+      }
+
+      /* Prevent iOS zoom: inputs must be >= 16px */
+      .input-row input {
+        font-size: 16px;
+        padding: 12px 14px;
+        min-height: 44px;
+      }
+
+      /* Stack input + button vertically on narrow screens */
+      .input-row {
+        flex-direction: column;
+      }
+
+      .save-btn {
+        width: 100%;
+        min-height: 44px;
+        font-size: 16px;
+      }
+
+      .get-key-btn {
+        min-height: 44px;
+        font-size: 16px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .remove-btn {
+        min-height: 44px;
+        font-size: 14px;
+        padding: 8px;
+        margin-left: 0;
+        margin-top: 8px;
+        display: inline-block;
+      }
+
+      .info-box { font-size: 12px; }
+
+      .current-key {
+        font-size: 12px;
+        word-break: break-all;
+      }
+    }
+
+    /* === Responsive — Very small screens (< 380px) === */
+    @media (max-width: 380px) {
+      body { padding: 16px 12px; }
+      .card { padding: 16px 12px; }
+      .card h2 { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">FinPulse</div>
+    <p class="subtitle">Settings</p>
+
+    <div class="card">
+      <h2>Connect Your News Feed</h2>
+      <p style="font-size:14px;color:#6e6e73;margin-bottom:16px;">
+        FinPulse uses GNews to fetch real-time finance news. You need a free API key to get started — it takes 30 seconds.
+      </p>
+
+      <ol class="steps">
+        <li>
+          Create a free account on GNews
+          <br>
+          <a href="https://gnews.io/register" target="_blank" rel="noopener" class="get-key-btn">
+            <svg viewBox="0 0 16 16"><path d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z" fill="currentColor"/></svg>
+            Get Free API Key
+          </a>
+        </li>
+        <li>
+          Sign up with your email — no credit card needed
+        </li>
+        <li>
+          Copy the API key from your GNews dashboard and paste it below
+        </li>
+      </ol>
+
+      <div class="input-group">
+        <label for="api-key-input">Your GNews API Key</label>
+        <div class="input-row">
+          <input type="text" id="api-key-input" placeholder="e.g. a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" spellcheck="false" autocomplete="off">
+          <button id="save-btn" class="save-btn">Save</button>
+        </div>
+      </div>
+
+      <div id="status" class="status"></div>
+
+      <div id="current-key" class="current-key">
+        Active key: <span id="key-display" class="key-value"></span>
+        <button id="remove-btn" class="remove-btn">Remove</button>
+      </div>
+
+      <div class="info-box">
+        <strong>Free plan includes:</strong> 100 requests/day — enough for normal browsing.
+        FinPulse caches results for 15 minutes, so each new tab doesn't count as a new request.
+      </div>
+    </div>
+  </div>
+
+  <script src="js/options.js"></script>
+</body>
+</html>

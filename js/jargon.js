@@ -76,7 +76,7 @@ FinPulse.Jargon = {
         const regex = new RegExp(`\\b(${escaped})\\b`, 'gi');
         // Encode tooltip text to prevent HTML injection from definitions
         const tooltip = this.terms[term].replace(/"/g, '&quot;');
-        html = html.replace(regex, `<span class="jargon-term" data-tooltip="${tooltip}">$1</span>`);
+        html = html.replace(regex, `<span class="jargon-term" tabindex="0" role="button" data-tooltip="${tooltip}">$1</span>`);
       });
       el.innerHTML = html;
     });
@@ -112,6 +112,46 @@ FinPulse.Jargon = {
     document.body.addEventListener('mouseout', (e) => {
       if (e.target.classList.contains('jargon-term')) {
         tooltip.style.display = 'none';
+      }
+    });
+
+    // Keyboard: show on focus, hide on blur
+    document.body.addEventListener('focusin', (e) => {
+      if (!e.target.classList.contains('jargon-term')) return;
+      tooltip.textContent = e.target.dataset.tooltip;
+      tooltip.style.display = 'block';
+      const rect = e.target.getBoundingClientRect();
+      const tooltipWidth = tooltip.offsetWidth;
+      let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+      left = Math.max(8, Math.min(left, window.innerWidth - tooltipWidth - 8));
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${rect.bottom + 6}px`;
+    });
+
+    document.body.addEventListener('focusout', (e) => {
+      if (e.target.classList.contains('jargon-term')) {
+        tooltip.style.display = 'none';
+      }
+    });
+
+    // Touch: tap to toggle tooltip
+    document.body.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('jargon-term')) {
+        tooltip.style.display = 'none';
+        return;
+      }
+      // Toggle: if already showing for this term, hide it
+      if (tooltip.style.display === 'block' && tooltip.textContent === e.target.dataset.tooltip) {
+        tooltip.style.display = 'none';
+      } else {
+        tooltip.textContent = e.target.dataset.tooltip;
+        tooltip.style.display = 'block';
+        const rect = e.target.getBoundingClientRect();
+        const tooltipWidth = tooltip.offsetWidth;
+        let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        left = Math.max(8, Math.min(left, window.innerWidth - tooltipWidth - 8));
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${rect.bottom + 6}px`;
       }
     });
   }

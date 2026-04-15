@@ -17,6 +17,15 @@ FinPulse.Watchlist = {
     this.items.push({ symbol, name });
     await FinPulse.Storage.set(this.STORAGE_KEY, this.items);
     this.render();
+    // Flash highlight on newly added item for visual feedback
+    const items = document.querySelectorAll('.watchlist-item');
+    const lastItem = items[items.length - 1];
+    if (lastItem) {
+      lastItem.style.transition = 'background-color 0.3s ease';
+      lastItem.style.backgroundColor = 'rgba(0, 102, 204, 0.1)';
+      lastItem.style.borderRadius = '6px';
+      setTimeout(() => { lastItem.style.backgroundColor = 'transparent'; }, 1200);
+    }
   },
 
   async remove(symbol) {
@@ -41,12 +50,17 @@ FinPulse.Watchlist = {
 
     if (this.items.length === 0) {
       container.innerHTML = `
+        <div class="watchlist-header">
+          <span style="font-size:16px">📊</span>
+          <h3>Watchlist</h3>
+        </div>
         <div class="watchlist-empty">
-          <p>Add stocks or crypto to your watchlist</p>
+          <p>Track stocks &amp; crypto symbols to highlight relevant news</p>
         </div>`;
     } else {
       container.innerHTML = `
         <div class="watchlist-header">
+          <span style="font-size:16px">📊</span>
           <h3>Watchlist</h3>
         </div>
         <div class="watchlist-items">
