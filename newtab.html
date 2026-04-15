@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinPulse — Finance News</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/intelligence.css">
+  <link rel="stylesheet" href="css/polish.css">
+  <link rel="stylesheet" href="css/personalization.css">
+</head>
+<body id="app" class="light">
+  <header class="top-bar">
+    <div class="logo">FinPulse</div>
+    <div id="search-container">
+      <input type="text" id="search-input" placeholder="Search articles...">
+      <button id="search-clear" type="button" aria-label="Clear search">&times;</button>
+      <span id="search-hint">Press <kbd>/</kbd> to search</span>
+    </div>
+    <div class="controls">
+      <select id="country-filter">
+        <option value="global">🌍 Global</option>
+        <option value="in">🇮🇳 India</option>
+        <option value="us">🇺🇸 United States</option>
+        <option value="gb">🇬🇧 United Kingdom</option>
+        <option value="eu">🇪🇺 Europe</option>
+        <option value="sg">🇸🇬 Singapore</option>
+        <option value="ae">🇦🇪 UAE</option>
+        <option value="jp">🇯🇵 Japan</option>
+        <option value="au">🇦🇺 Australia</option>
+        <option value="ca">🇨🇦 Canada</option>
+      </select>
+      <button id="bookmarks-toggle" title="Saved articles">&#9734;</button>
+      <button id="theme-toggle" title="Toggle theme">☀️</button>
+    </div>
+  </header>
+
+  <section class="greeting">
+    <h1 id="greeting-text"></h1>
+    <p id="date-text"></p>
+  </section>
+
+  <div class="intelligence-row">
+    <div id="daily-briefing"></div>
+    <div id="market-mood"></div>
+  </div>
+
+  <aside id="watchlist-panel"></aside>
+
+  <nav class="category-tabs">
+    <button class="tab active" data-category="top">🔥 Top Stories</button>
+    <button class="tab" data-category="markets">📈 Markets</button>
+    <button class="tab" data-category="crypto">₿ Crypto</button>
+    <button class="tab" data-category="personal-finance">💰 Personal Finance</button>
+    <button class="tab" data-category="economy">🏛️ Economy</button>
+    <button class="tab" data-category="startups">🚀 Startups</button>
+  </nav>
+
+  <main class="news-grid" id="news-grid">
+    <!-- News cards injected by JS -->
+  </main>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Fetching latest finance news...</p>
+  </div>
+
+  <div class="error-state" id="error-state" style="display:none">
+    <p>Unable to fetch news. <button id="retry-btn">Retry</button></p>
+  </div>
+
+  <aside id="bookmarks-panel"></aside>
+
+  <footer class="footer">
+    <p>FinPulse — Your daily finance briefing</p>
+  </footer>
+
+  <script src="js/storage.js"></script>
+  <script src="js/country.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/news.js"></script>
+  <script src="js/briefing.js"></script>
+  <script src="js/sentiment.js"></script>
+  <script src="js/jargon.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/watchlist.js"></script>
+  <script src="js/preferences.js"></script>
+  <script src="js/bookmarks.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

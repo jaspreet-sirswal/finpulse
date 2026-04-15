@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "FinPulse — Finance News Dashboard",
+  "description": "Replace your new tab with curated global finance news",
+  "version": "1.0.0",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://gnews.io/*"
+  ],
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  }
+}

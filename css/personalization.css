@@ -1,0 +1,470 @@
+/* === Phase 3: Personalization — Watchlist, Bookmarks, Preferences === */
+
+/* ------------------------------------------------------------------ */
+/*  Watchlist Panel                                                    */
+/* ------------------------------------------------------------------ */
+#watchlist-panel {
+  max-width: 300px;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 0 auto 20px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+body.light #watchlist-panel {
+  background: #ffffff;
+  border: 1px solid #d1d1d6;
+}
+
+body.dark #watchlist-panel {
+  background: #16213e;
+  border: 1px solid #2a2a4a;
+}
+
+.watchlist-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.watchlist-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+body.light .watchlist-header h3 {
+  color: #1d1d1f;
+}
+
+body.dark .watchlist-header h3 {
+  color: #e4e4e7;
+}
+
+.watchlist-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.watchlist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  gap: 8px;
+}
+
+body.light .watchlist-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.dark .watchlist-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.watchlist-item:last-child {
+  border-bottom: none;
+}
+
+.watchlist-symbol {
+  font-weight: 700;
+  font-size: 14px;
+  min-width: 60px;
+}
+
+body.light .watchlist-symbol {
+  color: #0066cc;
+}
+
+body.dark .watchlist-symbol {
+  color: #4da6ff;
+}
+
+.watchlist-name {
+  font-size: 12px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.light .watchlist-name {
+  color: #6e6e73;
+}
+
+body.dark .watchlist-name {
+  color: #9ca3af;
+}
+
+.watchlist-remove {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+body.light .watchlist-remove {
+  color: #6e6e73;
+}
+
+body.dark .watchlist-remove {
+  color: #9ca3af;
+}
+
+.watchlist-remove:hover {
+  color: #dc2626;
+}
+
+/* Watchlist empty state */
+.watchlist-empty p {
+  text-align: center;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+body.light .watchlist-empty p {
+  color: #6e6e73;
+}
+
+body.dark .watchlist-empty p {
+  color: #9ca3af;
+}
+
+/* Watchlist add form */
+.watchlist-add {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+#watchlist-input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+body.light #watchlist-input {
+  background: #f5f5f7;
+  border: 1px solid #d1d1d6;
+  color: #1d1d1f;
+}
+
+body.dark #watchlist-input {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  color: #e4e4e7;
+}
+
+#watchlist-input:focus {
+  border-color: #0066cc;
+}
+
+body.dark #watchlist-input:focus {
+  border-color: #4da6ff;
+}
+
+#watchlist-add-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+  color: #ffffff;
+}
+
+body.light #watchlist-add-btn {
+  background: #0066cc;
+}
+
+body.dark #watchlist-add-btn {
+  background: #4da6ff;
+}
+
+#watchlist-add-btn:hover {
+  opacity: 0.85;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Bookmark Button (on news cards)                                    */
+/* ------------------------------------------------------------------ */
+/* Card needs relative positioning for the absolute bookmark btn */
+.news-card {
+  position: relative;
+}
+
+.bookmark-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: rgba(0, 0, 0, 0.45);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s, background 0.2s;
+  color: #ffffff;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Show on card hover */
+.news-card:hover .bookmark-btn {
+  opacity: 1;
+}
+
+/* Always visible when bookmarked */
+.bookmark-btn.bookmarked {
+  opacity: 1;
+  color: #f59e0b;
+}
+
+body.light .bookmark-btn:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+body.dark .bookmark-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Bookmarks Panel (slide-in overlay)                                 */
+/* ------------------------------------------------------------------ */
+#bookmarks-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 350px;
+  height: 100vh;
+  z-index: 200;
+  display: none;
+  overflow-y: auto;
+  transition: background-color 0.3s ease;
+}
+
+body.light #bookmarks-panel {
+  background: #ffffff;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+}
+
+body.dark #bookmarks-panel {
+  background: #16213e;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+.bookmarks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+body.light .bookmarks-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.dark .bookmarks-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.bookmarks-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+body.light .bookmarks-header h3 {
+  color: #1d1d1f;
+}
+
+body.dark .bookmarks-header h3 {
+  color: #e4e4e7;
+}
+
+#bookmarks-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+body.light #bookmarks-close {
+  color: #6e6e73;
+}
+
+body.dark #bookmarks-close {
+  color: #9ca3af;
+}
+
+#bookmarks-close:hover {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+.bookmarks-list {
+  overflow-y: auto;
+}
+
+.bookmark-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  text-decoration: none;
+  gap: 4px;
+  transition: background-color 0.15s;
+}
+
+body.light .bookmark-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  color: #1d1d1f;
+}
+
+body.dark .bookmark-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #e4e4e7;
+}
+
+body.light .bookmark-item:hover {
+  background: rgba(0, 102, 204, 0.04);
+}
+
+body.dark .bookmark-item:hover {
+  background: rgba(77, 166, 255, 0.06);
+}
+
+.bookmark-source {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+body.light .bookmark-source {
+  color: #0066cc;
+}
+
+body.dark .bookmark-source {
+  color: #4da6ff;
+}
+
+.bookmark-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bookmark-time {
+  font-size: 11px;
+}
+
+body.light .bookmark-time {
+  color: #6e6e73;
+}
+
+body.dark .bookmark-time {
+  color: #9ca3af;
+}
+
+.bookmarks-empty {
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 13px;
+}
+
+body.light .bookmarks-empty {
+  color: #6e6e73;
+}
+
+body.dark .bookmarks-empty {
+  color: #9ca3af;
+}
+
+/* Bookmarks toggle button in header */
+#bookmarks-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+body.light #bookmarks-toggle {
+  color: #1d1d1f;
+}
+
+body.dark #bookmarks-toggle {
+  color: #e4e4e7;
+}
+
+#bookmarks-toggle:hover {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Watchlist-relevant badge on news cards                             */
+/* ------------------------------------------------------------------ */
+.news-card.watchlist-relevant {
+  position: relative;
+}
+
+body.light .news-card.watchlist-relevant {
+  border: 1px solid rgba(0, 102, 204, 0.3);
+}
+
+body.dark .news-card.watchlist-relevant {
+  border: 1px solid rgba(77, 166, 255, 0.3);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Responsive — Mobile (<768px)                                       */
+/* ------------------------------------------------------------------ */
+@media (max-width: 768px) {
+  #watchlist-panel {
+    max-width: 100%;
+    margin: 0 16px 16px;
+    border-radius: 10px;
+  }
+
+  #bookmarks-panel {
+    width: 100%;
+  }
+}
