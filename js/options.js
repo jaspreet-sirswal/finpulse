@@ -47,7 +47,10 @@ saveBtn.addEventListener('click', function() {
           saveBtn.textContent = 'Save';
           // Open a new tab to show news after short delay
           setTimeout(function() {
-            chrome.tabs.create({ url: 'chrome://newtab' });
+            // Firefox uses about:newtab, Chrome/Edge use chrome://newtab
+            var isFirefox = typeof browser !== 'undefined';
+            var newtabUrl = isFirefox ? 'about:newtab' : 'chrome://newtab';
+            chrome.tabs.create({ url: newtabUrl });
           }, 800);
         });
       } else if (res.status === 403) {
